@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Chat MSG</title>
+    <!-- <link rel="stylesheet" href="style.css"> -->
+     <style>
+        /* body{
+            margin: 20px;
+            padding: 0;
+            background-color:#e5bebe;
+        }
+        #msgTet{
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: calc(100% - 100px);
+            height: 25px;
+            padding-left: 10px;
+            box-sizing: border-box;
+        }
+        #messages{
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: calc(100% - 50px);
+            background: #e2cccc;
+            overflow-y: auto;
+            padding: 10px;
+            box-sizing: border-box;
+        
+        }
+        #msgBtn{
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: 50px;
+            height: 10px;
+        }
+           */
+           #messages{
+            background-color: #fff;
+            border: .0625rem solid #ddd;
+            padding: .625rem;
+            margin: .625rem;
+         /*  width: 30.75rem ; 
+           height: 30.75rem;  */
+          width: 100vw; 
+           height: 90vh;    
+           
+            
+            border-radius: .3125rem;
+            box-shadow: 0 0 .625rem rgba(0,0,0,0.1);
+           }
+           #sending{
+            background-color: #f0f0f0;
+            padding: .75rem;
+            border-bottom: .0625rem solid #ddd;
+            position: fixed;
+            bottom: 0;
+            margin-bottom: 1.875rem;
+           }
+         #msgText{
+            position: fixed;
+            bottom: 2.5rem;
+            margin-bottom:3.125rem;
+            left: 0;
+            width: 100%;
+            padding: 2.5rem;
+            background-color: #fff;
+            border: 1px solid #ddd;
+         }
+         #msgBtn{
+            margin-left: .75rem;
+            color: blue;
+            background-color: burlywood;
+         }
+          
+         @media(max-width:998px){
+            html{
+                font-size: 55%;
+            }
+        }
+            @media(max-width:768px){
+                html{
+                    font-size: 45%;
+                }
+            }
+         
+     </style>
+</head>
+
+<body>
+    <div id="messages"></div>
+
+    <div id="sending">
+        <input type="text"id="msgText"placeholder="ENTER YOUR MSG.....">
+        <input type="submit"id="msgBtn"value="send"onclick="module.sendMsg()">
+
+    </div>
+
+    <script>
+        module = {} ;
+    </script>
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getDatabase, ref, set, remove, onChildAdded, onChildRemoved } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+        // TODO: Add SDKs for Firebase products that you want to use
+        // https://firebase.google.com/docs/web/setup#available-libraries
+      
+             const firebaseConfig = {
+          apiKey: "AIzaSyATnoC2x2l-mspZsRwgHnMaLFOcOowAb7A",
+          authDomain: "coder-d9207.firebaseapp.com",
+          projectId: "coder-d9207",
+          storageBucket: "coder-d9207.appspot.com",
+          messagingSenderId: "813233465092",
+          appId: "1:813233465092:web:5fcc742687cc0c2a0e5251"
+        };
+       const app = initializeApp(firebaseConfig);
+       const db = getDatabase(app);
+
+       //varible
+       var msgText = document.getElementById("msgText")
+       var sender;
+       if(sessionStorage.getItem('sender')){
+        sender = sessionStorage.getItem('sender');
+       }else{
+        sender = prompt("plese enter your name");
+        sessionStorage.setItem('sender',sender);
+       }
+       //to send msg
+       module.sendMsg = function sendMsg(){
+        var msg= msgText.value;
+        var timestamp = new Date().getTime();
+        set(ref(db,"messages/"+ timestamp),{
+            msg : msg,
+            sender : sender
+        })
+       }
+       // to recive msg
+       onChildAdded(ref(db,"messages"),(data)=>{
+       // console.log(data.val().sender + ":" + data.val().msg);
+         if (data.val().sender ==  sender){
+            messages.innerHTML += "<div style=justify-content:end class=outer id="+data.key+"><div id =inner class=me>you : "+data.val().msg+"<button id=dltMsg onclick=module.dltMsg("+data.key+")>DELETE</button></div></div>"
+         }else{
+            messages.innerHTML += "<div class=outer id="+data.key+"><div id =inner class=notMe>"+data.val().sender+":" +data.val().msg+"</div></div>"
+  
+         }
+       })
+       // to delete msg
+       module.dltMsg =function dltMsg(key){
+        //console.log(key);
+        remove(ref(db,"messages/"+key));
+       }
+       //when msg is deleted
+       onChildRemoved(ref(db,"messages"),(data)=>{
+        //console.log(data.key);
+        var msgBox = document.getElementById(data.key)
+       // console.log(msgBox)
+       messages.removeChild(msgBox)
+       })
+      </script>
+   
+</body>
+</html>
